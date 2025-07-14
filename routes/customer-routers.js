@@ -9,7 +9,7 @@ const {saveCustomer,
         verifyToken   } = require('../Controllers/customer-controller');
 
 router.post('/', verifyToken, saveCustomer);
-router.get('/get', verifyToken, getAllCustomer);
+router.get('/get', getAllCustomer);
 router.put('/:id', verifyToken, updateCustomer);
 router.delete('/:id', verifyToken, deleteCustomer);
 router.get('/:id', verifyToken, getCustomerById);
