@@ -5,12 +5,13 @@ const {saveCustomer,
         getAllCustomer,
         updateCustomer,
         deleteCustomer,
-        getCustomerById} = require('../Controllers/customer-controller');
+        getCustomerById,
+        verifyToken   } = require('../Controllers/customer-controller');
 
-router.post('/', saveCustomer);
-router.get('/', getAllCustomer);
-router.put('/:id', updateCustomer);
-router.delete('/:id', deleteCustomer);
-router.get('/:id', getCustomerById);
+router.post('/', verifyToken, saveCustomer);
+router.get('/', verifyToken, getAllCustomer);
+router.put('/:id', verifyToken, updateCustomer);
+router.delete('/:id', verifyToken, deleteCustomer);
+router.get('/:id', verifyToken, getCustomerById);
 
 module.exports = router;

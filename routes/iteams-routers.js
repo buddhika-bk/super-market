@@ -5,13 +5,17 @@ const { saveItems,
         getAllItems,
         updateItems,
         deleteItems,
-        getItemsById
+        getItemsById,
+        verifyToken
                     } = require('../Controllers/iteams-controller');
 
-router.post('/', saveItems);
+// Public routes - no authentication required
 router.get('/', getAllItems);
-router.put('/:id', updateItems);
-router.delete('/:id', deleteItems);
 router.get('/:id', getItemsById);
+
+// Protected routes - require JWT authentication00
+router.post('/', verifyToken, saveItems);
+router.put('/:id', verifyToken, updateItems);
+router.delete('/:id', verifyToken, deleteItems);
 
 module.exports = router;

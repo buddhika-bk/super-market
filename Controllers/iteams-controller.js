@@ -1,4 +1,8 @@
 const { MongoClient ,ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
+
+// JWT Secret Key (should match the one in user-controller.js)
+const JWT_SECRET = 'your-secret-key-change-in-production';
 
 // Connection URL
 const url = 'mongodb://127.0.0.1:27017';
@@ -45,10 +49,29 @@ const getItemsById = async(req, res) => {
 
 }
 
+// Middleware to verify JWT token
+const verifyToken = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
+    
+    if (!token) {
+      return res.status(401).send({ error: "Access token required" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Add user info to request object
+    next();
+  } catch (err) {
+    console.error(err);
+    return res.status(401).send({ error: "Invalid or expired token" });
+  }
+};
+
 module.exports = {
     saveItems,
     getAllItems,
     updateItems,
     deleteItems,
-    getItemsById
+    getItemsById,
+    verifyToken
 }

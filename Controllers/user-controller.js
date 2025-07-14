@@ -1,6 +1,10 @@
 const { MongoClient ,ObjectId } = require('mongodb');
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// JWT Secret Key (in production, use environment variable)
+const JWT_SECRET = 'your-secret-key-change-in-production';
 
 // Connection URL
 const url = 'mongodb://127.0.0.1:27017';
@@ -68,15 +72,54 @@ const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).send({ error: "Invalid credentials" });
 
-    res.send({ message: "Login successful", userId: user._id });
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user._id, 
+        email: user.email,
+        username: user.username 
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' } // Token expires in 24 hours
+    );
+
+    res.send({ 
+      message: "Login successful", 
+      userId: user._id,
+      token: token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send({ error: "Login failed" });
   }
 };
 
+// Middleware to verify JWT token
+const verifyToken = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
+    
+    if (!token) {
+      return res.status(401).send({ error: "Access token required" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Add user info to request object
+    next();
+  } catch (err) {
+    console.error(err);
+    return res.status(401).send({ error: "Invalid or expired token" });
+  }
+};
+
 module.exports = {
     saveUsers,
     getAllUsers,
-    loginUser
+    loginUser,
+    verifyToken
 }

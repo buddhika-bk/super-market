@@ -16,7 +16,7 @@ app.use(express.json())
 
 
 
-app.use('/api/v1/customers', customerRouter)
+app.use('/api/v1/customers',customerRouter)
 app.use('/api/v1/iteams', iteamRouter)
 app.use('/api/v1/users',userRouter)
 
