@@ -10,7 +10,7 @@ const { saveItems,
                     } = require('../Controllers/iteams-controller');
 
 // Public routes - no authentication required
-router.get('/', getAllItems);
+router.get('/get', getAllItems);
 router.get('/:id', getItemsById);
 
 // Protected routes - require JWT authentication00
