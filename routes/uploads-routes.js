@@ -48,4 +48,18 @@ router.post("/image", (req, res) => {
   });
 });
 
+// GET all uploaded images
+router.get("/images", (req, res) => {
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ message: "Unable to read uploads directory", error: err.message });
+    }
+    // Optionally, filter for image files only
+    const imageFiles = files.filter(file =>
+      /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(file)
+    );
+    res.json({ images: imageFiles });
+  });
+});
+
 module.exports = router;
