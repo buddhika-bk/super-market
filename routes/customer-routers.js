@@ -6,9 +6,10 @@ const {saveCustomer,
         updateCustomer,
         deleteCustomer,
         getCustomerById,
-        verifyToken   } = require('../Controllers/customer-controller');
+        verifyToken,
+        upload   } = require('../Controllers/customer-controller');
 
-router.post('/', verifyToken, saveCustomer);
+router.post('/',  upload.single('photo'), saveCustomer);
 router.get('/get', getAllCustomer);
 router.put('/:id', verifyToken, updateCustomer);
 router.delete('/:id', verifyToken, deleteCustomer);

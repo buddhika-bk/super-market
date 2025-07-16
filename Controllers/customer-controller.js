@@ -20,9 +20,9 @@ async function connectDB() {
 }
 
 // Upload folder
-const uploadDir = path.join(__dirname, 'uploads');
+const uploadDir = path.join(__dirname, '..', 'uploads-customers');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Multer config
@@ -66,12 +66,25 @@ const saveCustomer = async (req, res) => {
   }
 };
 
+const BASE_URL = "http://localhost:3000"; // Change to your server's URL and port
+
+function addPhotoUrl(customer) {
+  if (customer.photo) {
+    customer.photoUrl = `${BASE_URL}/uploads-customers/${customer.photo}`;
+  } else {
+    customer.photoUrl = null;
+  }
+  return customer;
+}
+
 const getAllCustomer = async (req, res) => {
   await connectDB();
   const db = client.db(dbName);
   const collection = db.collection('customer');
   const findResult = await collection.find({}).toArray();
-  res.send(findResult);
+  // Add photoUrl to each customer
+  const customersWithPhotoUrl = findResult.map(addPhotoUrl);
+  res.send(customersWithPhotoUrl);
 };
 
 const updateCustomer = async (req, res) => {
@@ -97,8 +110,12 @@ const getCustomerById = async (req, res) => {
   await connectDB();
   const db = client.db(dbName);
   const collection = db.collection('customer');
-  const filteredDocs = await collection.findOne({ _id: new ObjectId(req.params.id) });
-  res.send(filteredDocs);
+  const customer = await collection.findOne({ _id: new ObjectId(req.params.id) });
+  if (customer) {
+    res.send(addPhotoUrl(customer));
+  } else {
+    res.status(404).send({ error: "Customer not found" });
+  }
 };
 
 const verifyToken = async (req, res, next) => {
