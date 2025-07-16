@@ -13,6 +13,6 @@ router.post('/',  upload.single('photo'), saveCustomer);
 router.get('/get', getAllCustomer);
 router.put('/:id', verifyToken, updateCustomer);
 router.delete('/:id', verifyToken, deleteCustomer);
-router.get('/:id', verifyToken, getCustomerById);
+router.get('/:id',getCustomerById);
 
 module.exports = router;

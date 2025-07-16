@@ -26,7 +26,7 @@ app.use('/api/v1/iteams', iteamRouter)
 app.use('/api/v1/users',userRouter)
 app.use('/uploads', uploadRouter);
 app.use('/upload', express.static(path.join(__dirname, '/uploads')));
-
+app.use('/uploads-customers', express.static(path.join(__dirname, 'uploads-customers')));
 
 
 app.listen(port, () => {
