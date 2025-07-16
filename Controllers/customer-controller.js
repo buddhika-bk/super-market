@@ -91,9 +91,35 @@ const updateCustomer = async (req, res) => {
   await connectDB();
   const db = client.db(dbName);
   const collection = db.collection('customer');
+  const customerId = req.params.id;
+
+  // Find the existing customer to get the old photo filename
+  const existingCustomer = await collection.findOne({ _id: new ObjectId(customerId) });
+
+  let newPhotoFilename = existingCustomer ? existingCustomer.photo : null;
+
+  // If a new photo is uploaded, delete the old one and use the new filename
+  if (req.file) {
+    // Delete old photo if it exists
+    if (existingCustomer && existingCustomer.photo) {
+      const oldPhotoPath = path.join(uploadDir, existingCustomer.photo);
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.unlinkSync(oldPhotoPath);
+      }
+    }
+    newPhotoFilename = req.file.filename;
+  }
+
+  // Prepare update fields
+  const updateFields = {
+    ...req.body,
+    photo: newPhotoFilename,
+    updatedAt: new Date(),
+  };
+
   const updateResult = await collection.updateOne(
-    { _id: new ObjectId(req.params.id) },
-    { $set: req.body }
+    { _id: new ObjectId(customerId) },
+    { $set: updateFields }
   );
   res.send(updateResult);
 };

@@ -11,7 +11,7 @@ const {saveCustomer,
 
 router.post('/',  upload.single('photo'), saveCustomer);
 router.get('/get', getAllCustomer);
-router.put('/:id', verifyToken, updateCustomer);
+router.put('/:id', upload.single('photo'), updateCustomer);
 router.delete('/:id', verifyToken, deleteCustomer);
 router.get('/:id',getCustomerById);
 
