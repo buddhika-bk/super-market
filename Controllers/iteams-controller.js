@@ -60,11 +60,45 @@ const getAllItems = async(req, res) => {
 
 }
 
-const updateItems = async(req, res) => {
-    const updateResult = await collection.updateOne({ _id: new ObjectId(req.params.id) },{ $set: req.body });
-    res.send(updateResult);
+const updateItems = async (req, res) => {
+  const itemId = req.params.id;
+  const { name, price, quantity } = req.body;
+  const db = client.db(dbName);
+  const collection = db.collection('items');
 
-}
+  // Find the existing item to get the old photo filename
+  const existingItem = await collection.findOne({ _id: new ObjectId(itemId) });
+
+  let newPhotoFilename = existingItem ? existingItem.photo : null;
+
+  // If a new photo is uploaded, delete the old one and use the new filename
+  if (req.file) {
+    // Delete old photo if it exists
+    if (existingItem && existingItem.photo) {
+      const oldPhotoPath = path.join(uploadDir, existingItem.photo);
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.unlinkSync(oldPhotoPath);
+      }
+    }
+    newPhotoFilename = req.file.filename;
+  }
+
+  // Update the item
+  const updateResult = await collection.updateOne(
+    { _id: new ObjectId(itemId) },
+    {
+      $set: {
+        name,
+        price,
+        quantity,
+        photo: newPhotoFilename,
+        updatedAt: new Date(),
+      },
+    }
+  );
+
+  res.send(updateResult);
+};
 
 const deleteItems = async(req, res) => {
     const deleteResult = await collection.deleteOne({ _id: new ObjectId(req.params.id) });
