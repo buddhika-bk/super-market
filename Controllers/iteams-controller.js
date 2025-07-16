@@ -1,5 +1,8 @@
 const { MongoClient ,ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 // JWT Secret Key (should match the one in user-controller.js)
 const JWT_SECRET = 'your-secret-key-change-in-production';
@@ -15,15 +18,41 @@ const dbName = 'super-market';
 const db = client.db(dbName);
 const collection = db.collection('items');
 
-
-
-
-const saveItems = async(req, res) => {
-   const insertResult = await collection.insertOne(req.body);
-   res.send(insertResult);
-
-
+// Upload folder for items
+const uploadDir = path.join(__dirname, '..', 'upload-iteams');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+// Multer config for items
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
+    cb(null, uniqueName);
+  },
+});
+const upload = multer({ storage });
+
+
+const saveItems = async (req, res) => {
+  const { name, price, quantity } = req.body;
+  const photo = req.file ? req.file.filename : null;
+
+  const newItem = {
+    name,
+    price,
+    quantity,
+    photo,
+    createdAt: new Date(),
+  };
+
+  const insertResult = await collection.insertOne(newItem);
+  res.send(insertResult);
+};
 
 const getAllItems = async(req, res) => {
     const findResult = await collection.find({}).toArray();
@@ -73,5 +102,6 @@ module.exports = {
     updateItems,
     deleteItems,
     getItemsById,
-    verifyToken
+    verifyToken,
+    upload
 }

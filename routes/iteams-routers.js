@@ -6,7 +6,8 @@ const { saveItems,
         updateItems,
         deleteItems,
         getItemsById,
-        verifyToken
+        verifyToken,
+        upload
                     } = require('../Controllers/iteams-controller');
 
 // Public routes - no authentication required
@@ -14,7 +15,7 @@ router.get('/get', getAllItems);
 router.get('/:id', getItemsById);
 
 // Protected routes - require JWT authentication00
-router.post('/', verifyToken, saveItems);
+router.post('/',  upload.single('photo'), saveItems);
 router.put('/:id', verifyToken, updateItems);
 router.delete('/:id', verifyToken, deleteItems);
 
